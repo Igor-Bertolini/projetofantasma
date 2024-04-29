@@ -73,21 +73,13 @@ ggsave("series_grupo.pdf", width = 158, height = 93, units = "mm")
 library(ggplot2)
 
 
-ggplot(dados, aes(x=title, y=imdb, group=season, color=season)) +
-  
-  
-  geom_line() +labs(título="Variação da nota IMDB por temporada dos episódios",
-                    
-                    
-                    x="Episódio",
-                    
-                    y="Nota IMDB",
-                    
-                    
-                    color="Temporada") +
-  
-  
-  theme_minimal()
+ggplot(dados, aes(x = season, y = imdb)) +
+  geom_bar(stat = "identity", fill = estat_colors[1]) +  # Use a primeira cor em estat_colors
+  labs(x = "Temporada", y = "Nota IMDB") +
+  theme_estat() +
+  ggtitle("Variação da nota IMDB por temporada dos episódios")
+
+
 
 
 #---------------------------------------------------------------------------------------------------------#
