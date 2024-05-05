@@ -62,22 +62,34 @@ ggplot(contagem_por_decada) +
                       labels = c("Serie" = "Série",
                                  "CrossOver" = "CrossOver",
                                  "Movie" = "Filme")) +
+  scale_x_continuous(breaks = seq(min(contagem_por_decada$decade), max(contagem_por_decada$decade), by = 10)) +
   theme_estat()
 ggsave("series_grupo.pdf", width = 158, height = 93, units = "mm")
+
 
 
 #--------------------------------------------------------------------------------------------------------#
 
 ##2) Variação da nota IMDB por temporada dos episódios;
 
+
+# Carregando a biblioteca necessária
 library(ggplot2)
 
 
-ggplot(dados, aes(x = season, y = imdb)) +
-  geom_bar(stat = "identity", fill = estat_colors[1]) +  # Use a primeira cor em estat_colors
-  labs(x = "Temporada", y = "Nota IMDB") +
-  theme_estat() +
-  ggtitle("Variação da nota IMDB por temporada dos episódios")
+# Carregando a biblioteca necessária
+library(dplyr)
+
+# Filtrando os dados
+dados_filtrados <- dados %>%
+  filter(season %in% c("1", "2", "3", "4"))
+
+# Criando o boxplot
+ggplot(dados_filtrados, aes(x = season, y = imdb)) +
+  geom_boxplot() +
+  labs(x = "Episódios", y = "imdb") +
+  theme_estat()
+
 
 
 
@@ -199,23 +211,28 @@ ggplot(dados, aes(x = imdb, y = engagement)) +
 
 #5) Variação da nota de engajamento pelo personagem que conseguiu capturar o monstro.
 
+# Carregando a biblioteca tidyr
 
-library(ggplot2)
+library(tidyr)
 
+# Reformate os dados para que cada linha represente um episódio
+dados_long <- dados %>%
+  pivot_longer(cols = c("daphnie_va", "velma_va", "shaggy_va", "scooby_va", "fred_va"),
+               names_to = "personagem",
+               values_to = "engagement")
 
-df_long <- reshape2::melt(dados, id.vars = "engagement", measure.vars = c("daphnie_va", "velma_va", "shaggy_va", "scooby_va", "fred_va"))
+# Substitua os nomes dos personagens
+dados_long$personagem <- recode(dados_long$personagem, 
+                                "daphnie_va" = "daphnie", 
+                                "velma_va" = "velma", 
+                                "shaggy_va" = "salsicha", 
+                                "scooby_va" = "scooby", 
+                                "fred_va" = "fred")
 
-
-ggplot(df_long, aes(x = variable, y = engagement)) +
-  
-  
+# Criando o boxplot
+ggplot(dados_long, aes(x = personagem, y = engagement)) +
   geom_boxplot() +
-  
-  
-  labs(title = "Variação da nota de engajamento pelo personagem",
-       
-       
-       x = "Personagem",
-       
-       
-       y = "Nota de Engajamento")
+  labs(x = "Personagem", y = "Nota de Engajamento") +
+  ggtitle("Boxplot da Nota de Engajamento pelo Personagem que Capturou o Monstro") +
+  theme_estat()
+
