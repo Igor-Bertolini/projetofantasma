@@ -76,7 +76,6 @@ ggsave("series_grupo.pdf", width = 158, height = 93, units = "mm")
 # Carregando a biblioteca necessária
 library(ggplot2)
 
-
 # Carregando a biblioteca necessária
 library(dplyr)
 
@@ -84,11 +83,25 @@ library(dplyr)
 dados_filtrados <- dados %>%
   filter(season %in% c("1", "2", "3", "4"))
 
+# Carregando a biblioteca necessária
+library(ggplot2)
+
+# Carregando a biblioteca necessária
+library(dplyr)
+
+
 # Criando o boxplot
-ggplot(dados_filtrados, aes(x = season, y = imdb)) +
-  geom_boxplot() +
-  labs(x = "Episódios", y = "imdb") +
+ggplot(dados_filtrados) +
+  aes(x = season, y = imdb) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Temporada", y = "imdb") +
   theme_estat()
+ggsave("box_bi.pdf", width = 158, height = 93, units = "mm")
+
+
 
 
 
@@ -162,7 +175,7 @@ tabela <- table(dados$setting_terrain, dados$set_a_trap)
 
 resultado <- chisq.test(tabela)
 
-
+print(tabela)
 print(resultado)
 
 
@@ -211,28 +224,25 @@ ggplot(dados, aes(x = imdb, y = engagement)) +
 
 #5) Variação da nota de engajamento pelo personagem que conseguiu capturar o monstro.
 
-# Carregando a biblioteca tidyr
 
 library(tidyr)
 
-# Reformate os dados para que cada linha represente um episódio
-dados_long <- dados %>%
-  pivot_longer(cols = c("daphnie_va", "velma_va", "shaggy_va", "scooby_va", "fred_va"),
-               names_to = "personagem",
-               values_to = "engagement")
+# Primeiro, certifique-se de que os dados estão no formato correto
+dados <- dados %>%
+  pivot_longer(
+    cols = c(daphnie_va, velma_va, shaggy_va, scooby_va, fred_va),
+    names_to = "personagem",
+    values_to = "nota_engajamento"
+  )
 
-# Substitua os nomes dos personagens
-dados_long$personagem <- recode(dados_long$personagem, 
-                                "daphnie_va" = "daphnie", 
-                                "velma_va" = "velma", 
-                                "shaggy_va" = "salsicha", 
-                                "scooby_va" = "scooby", 
-                                "fred_va" = "fred")
+# Em seguida, filtre os dados para incluir apenas os casos em que o monstro foi capturado
+dados <- dados %>%
+  filter(monster == 1)
 
-# Criando o boxplot
-ggplot(dados_long, aes(x = personagem, y = engagement)) +
-  geom_boxplot() +
-  labs(x = "Personagem", y = "Nota de Engajamento") +
-  ggtitle("Boxplot da Nota de Engajamento pelo Personagem que Capturou o Monstro") +
+# Agora, você pode criar o gráfico
+ggplot(dados) +
+  aes(x = data, y = nota_engajamento, color = personagem) +
+  geom_line() +
+  labs(x = "Data", y = "Nota de Engajamento", color = "Personagem") +
   theme_estat()
 
