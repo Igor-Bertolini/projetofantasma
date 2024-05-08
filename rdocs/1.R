@@ -178,6 +178,22 @@ resultado <- chisq.test(tabela)
 print(tabela)
 print(resultado)
 
+# Carregando a biblioteca ggplot2
+library(ggplot2)
+
+# Gráfico de barras para os terrenos mais frequentes
+ggplot(terrenos_frequentes, aes(x = setting_terrain, y = n)) +
+  geom_bar(stat = "identity", fill = "#003366") +
+  theme_estat() +
+  labs(x = "Terreno", y = "Frequência", title = "Top 3 Terrenos Mais Frequentes")
+
+# Gráfico de barras empilhadas para a relação entre o terreno e a ativação da armadilha
+ggplot(analise, aes(x = setting_terrain, y = Count, fill = set_a_trap)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(x = "Terreno", y = "Contagem", fill = "Armadilha Ativada", title = "Relação entre Terreno e Ativação da Armadilha")
+
+
 
 #portanto, nao há relacao entre o terreno e a ativação da armadilha pela primeira vez
 
@@ -237,7 +253,7 @@ dados <- dados %>%
 
 # Em seguida, filtre os dados para incluir apenas os casos em que o monstro foi capturado
 dados <- dados %>%
-  filter(monster == 1)
+  filter(monster_name == 1)
 
 # Agora, você pode criar o gráfico
 ggplot(dados) +
