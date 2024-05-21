@@ -116,33 +116,6 @@ ggsave("box_bi.pdf", width = 158, height = 93, units = "mm")
 library(dplyr)
 
 
-# Encontre os 3 terrenos mais frequentes
-
-
-terrenos_frequentes <- dados %>%
-  
-  
-  count(setting_terrain) %>%
-  
-  
-  arrange(desc(n)) %>%
-  
-  
-  head(3)
-
-
-
-
-# Filtrar os dados para apenas esses terrenos
-
-dados_filtrados <- dados %>%
-  
-  
-  filter(setting_terrain %in% terrenos_frequentes$setting_terrain)
-
-
-
-
 # Analisando a relação entre o terreno e a ativação da armadilha pela primeira vez
 
 
@@ -178,20 +151,30 @@ resultado <- chisq.test(tabela)
 print(tabela)
 print(resultado)
 
-# Carregando a biblioteca ggplot2
-library(ggplot2)
+# Identificando os top 3 terrenos mais usados
+top_terrenos <- dados %>%
+  count(setting_terrain) %>%
+  arrange(desc(n)) %>%
+  head(3)
 
-# Gráfico de barras para os terrenos mais frequentes
-ggplot(terrenos_frequentes, aes(x = setting_terrain, y = n)) +
-  geom_bar(stat = "identity", fill = "#003366") +
-  theme_estat() +
-  labs(x = "Terreno", y = "Frequência", title = "Top 3 Terrenos Mais Frequentes")
+# Filtrando os dados para incluir apenas os top 3 terrenos
+dados_filtrados <- dados %>%
+  filter(setting_terrain %in% top_terrenos$setting_terrain)
 
-# Gráfico de barras empilhadas para a relação entre o terreno e a ativação da armadilha
-ggplot(analise, aes(x = setting_terrain, y = Count, fill = set_a_trap)) +
-  geom_bar(stat = "identity") +
-  theme_minimal() +
-  labs(x = "Terreno", y = "Contagem", fill = "Armadilha Ativada", title = "Relação entre Terreno e Ativação da Armadilha")
+# Contando a frequência de ativação da armadilha para cada terreno
+contagem_por_terreno <- dados_filtrados %>%
+  group_by(setting_terrain, trap_work_first) %>%
+  summarise(n = n(), .groups = "drop")
+
+# Criando o gráfico de barras
+ggplot(contagem_por_terreno) +
+  aes(x = setting_terrain, y = n, fill = trap_work_first) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Terreno", y = "Frequência de ativação da armadilha") +
+  scale_fill_discrete(labels = c("Falso", "Verdadeiro")) +
+  theme_estat()
+
+  
 
 
 
