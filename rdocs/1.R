@@ -187,44 +187,67 @@ ggplot(contagem_por_terreno) +
 
 
 # 4) Relação entre as notas IMDB e engajamento;
+library(ggplot2)
 
-
+# Carrega a biblioteca
 library(ggplot2)
 
 
+# Calcula a correlação
 correlacao <- cor(dados$imdb, dados$engagement, method = "pearson")
-
-
 print(paste("A correlação entre as notas IMDB e o engajamento é", round(correlacao, 2)))
 
+# Realiza o teste de correlação
+teste_correlacao <- cor.test(dados$imdb, dados$engagement, method = "pearson")
+print(teste_correlacao)
 
-ggplot(dados, aes(x = imdb, y = engagement)) +
-  
-  
+# Plota o gráfico com eixos invertidos
+ggplot(dados, aes(y = imdb, x = engagement)) +
   geom_point() +
-  
-  
   geom_smooth(method = lm, se = FALSE, color = "red") +
-  
-  
-  labs(title = "Relação entre as notas IMDB e o engajamento",
-       
-       
-       x = "Notas IMDB",
-       
-       
-       y = "Engajamento")
+  labs(title = "Relação entre o engajamento e as notas IMDB",
+       y = "Notas IMDB",
+       x = "Engajamento")
+ggsave("disp_bi.pdf", width = 158, height = 93, units = "mm")
 
+
+# Carrega a biblioteca
+library(dplyr)
+
+# Calcula as estatísticas
+estatisticas <- dados %>%
+  summarise(
+    Media_IMDB = mean(imdb, na.rm = TRUE),
+    Desvio_Padrao_IMDB = sd(imdb, na.rm = TRUE),
+    Variancia_IMDB = var(imdb, na.rm = TRUE),
+    Minimo_IMDB = min(imdb, na.rm = TRUE),
+    Primeiro_Quartil_IMDB = quantile(imdb, 0.25, na.rm = TRUE),
+    Mediana_IMDB = median(imdb, na.rm = TRUE),
+    Terceiro_Quartil_IMDB = quantile(imdb, 0.75, na.rm = TRUE),
+    Maximo_IMDB = max(imdb, na.rm = TRUE),
+    Media_Engajamento = mean(engagement, na.rm = TRUE),
+    Desvio_Padrao_Engajamento = sd(engagement, na.rm = TRUE),
+    Variancia_Engajamento = var(engagement, na.rm = TRUE),
+    Minimo_Engajamento = min(engagement, na.rm = TRUE),
+    Primeiro_Quartil_Engajamento = quantile(engagement, 0.25, na.rm = TRUE),
+    Mediana_Engajamento = median(engagement, na.rm = TRUE),
+    Terceiro_Quartil_Engajamento = quantile(engagement, 0.75, na.rm = TRUE),
+    Maximo_Engajamento = max(engagement, na.rm = TRUE)
+  )
+
+# Exibe as estatísticas
+print(estatisticas)
 
 
 
 #----------------------------------------------------------------------------------------------------#
 
 
-#5) Variação da nota de engajamento pelo personagem que conseguiu capturar o monstro.
-
-
 library(tidyr)
+
+#5 Gráfico relacionando Personagens que capturam o monstro e Engajamento
+# Verifique as colunas do seu conjunto de dados
+colnames(dados)
 
 # Primeiro, certifique-se de que os dados estão no formato correto
 dados <- dados %>%
@@ -240,8 +263,9 @@ dados <- dados %>%
 
 # Agora, você pode criar o gráfico
 ggplot(dados) +
-  aes(x = data, y = nota_engajamento, color = personagem) +
-  geom_line() +
-  labs(x = "Data", y = "Nota de Engajamento", color = "Personagem") +
+  aes(x = personagem, y = nota_engajamento) +
+  geom_boxplot() +
+  labs(x = "Personagem", y = "Nota de Engajamento") +
   theme_estat()
+
 
