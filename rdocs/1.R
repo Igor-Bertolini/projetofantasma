@@ -76,19 +76,10 @@ ggsave("series_grupo.pdf", width = 158, height = 93, units = "mm")
 # Carregando a biblioteca necessária
 library(ggplot2)
 
-# Carregando a biblioteca necessária
-library(dplyr)
 
 # Filtrando os dados
 dados_filtrados <- dados %>%
   filter(season %in% c("1", "2", "3", "4"))
-
-# Carregando a biblioteca necessária
-library(ggplot2)
-
-# Carregando a biblioteca necessária
-library(dplyr)
-
 
 # Criando o boxplot
 ggplot(dados_filtrados) +
@@ -102,6 +93,28 @@ ggplot(dados_filtrados) +
 ggsave("box_bi.pdf", width = 158, height = 93, units = "mm")
 
 
+# Carregando a biblioteca necessária
+library(dplyr)
+
+# Filtrando os dados
+dados_filtrados <- dados %>%
+  filter(season %in% c("1", "2", "3", "4"))
+
+# Calculando as estatísticas
+estatisticas <- dados_filtrados %>%
+  summarise(
+    Media = mean(imdb, na.rm = TRUE),
+    Desvio_Padrao = sd(imdb, na.rm = TRUE),
+    Variancia = var(imdb, na.rm = TRUE),
+    Minimo = min(imdb, na.rm = TRUE),
+    Primeiro_Quartil = quantile(imdb, 0.25, na.rm = TRUE),
+    Mediana = median(imdb, na.rm = TRUE),
+    Terceiro_Quartil = quantile(imdb, 0.75, na.rm = TRUE),
+    Maximo = max(imdb, na.rm = TRUE)
+  )
+
+# Imprimindo as estatísticas
+print(estatisticas)
 
 
 
@@ -246,26 +259,39 @@ print(estatisticas)
 library(tidyr)
 
 #5 Gráfico relacionando Personagens que capturam o monstro e Engajamento
-# Verifique as colunas do seu conjunto de dados
-colnames(dados)
 
-# Primeiro, certifique-se de que os dados estão no formato correto
-dados <- dados %>%
+# Carregando a biblioteca necessária
+library(tidyverse)
+
+# Reestruturando os dados
+dados_long <- dados %>%
   pivot_longer(
-    cols = c(daphnie_va, velma_va, shaggy_va, scooby_va, fred_va),
-    names_to = "personagem",
-    values_to = "nota_engajamento"
+    cols = c(daphnie_va, fred_va, velma_va, shaggy_va, scooby_va, caught_not, caught_other), # Adicione as colunas relevantes aqui
+    names_to = "character",
+    values_to = "value"
   )
 
-# Em seguida, filtre os dados para incluir apenas os casos em que o monstro foi capturado
-dados <- dados %>%
-  filter(monster_name == 1)
+# Renomeando os valores na coluna de personagens
+dados_long$character <- gsub("_va", "", dados_long$character)
 
-# Agora, você pode criar o gráfico
-ggplot(dados) +
-  aes(x = personagem, y = nota_engajamento) +
-  geom_boxplot() +
-  labs(x = "Personagem", y = "Nota de Engajamento") +
+# Substituindo "shaggy" por "salsicha"
+dados_long$character <- gsub("shaggy", "salsicha", dados_long$character)
+
+# Substituindo "caught_not" por "Nenhum" e "caught_other" por "Outros"
+dados_long$character <- recode(dados_long$character, "caught_not" = "Nenhum", "caught_other" = "Outros")
+
+# Filtrando os dados
+dados_filtrados <- dados_long %>%
+  filter(!is.na(value))
+
+# Criando o boxplot
+ggplot(dados_filtrados) +
+  aes(x = character, y = engagement) +
+  geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+  stat_summary(
+    fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+  ) +
+  labs(x = "Personagem", y = "Engajamento") +
   theme_estat()
-
+ggsave("boxplot_engajamento_personagem.pdf", width = 158, height = 93, units = "mm")
 
