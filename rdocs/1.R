@@ -126,43 +126,13 @@ print(estatisticas)
 ## 3) Top 3 terrenos mais frequentes pela ativação da armadilha;
 
 
+library(stringr)
 library(dplyr)
+library(forcats)
+library(ggplot2)
 
-
-# Analisando a relação entre o terreno e a ativação da armadilha pela primeira vez
-
-
-
-
-analise <- dados_filtrados %>%
-  
-  
-  group_by(setting_terrain,set_a_trap) %>%
-  
-  
-  summarise(Count = n(), .groups = "drop")
-
-
-
-
-print(analise)
-
-
-
-
-#para saber se há relacao, teste do qui-quadrado
-
-
-library(chisq.posthoc.test)
-
-
-tabela <- table(dados$setting_terrain, dados$set_a_trap)
-
-
-resultado <- chisq.test(tabela)
-
-print(tabela)
-print(resultado)
+# Traduzindo os nomes dos terrenos
+dados$setting_terrain <- recode(dados$setting_terrain, "Forest" = "Floresta", "Urban" = "Urbano")
 
 # Identificando os top 3 terrenos mais usados
 top_terrenos <- dados %>%
@@ -179,19 +149,18 @@ contagem_por_terreno <- dados_filtrados %>%
   group_by(setting_terrain, trap_work_first) %>%
   summarise(n = n(), .groups = "drop")
 
-# Criando o gráfico de barras
-ggplot(contagem_por_terreno) +
-  aes(x = setting_terrain, y = n, fill = trap_work_first) +
+# Calculando as porcentagens
+contagem_por_terreno <- contagem_por_terreno %>%
+  mutate(percent = n / sum(n) * 100)
+
+# Criando o gráfico
+ggplot(contagem_por_terreno, aes(x = reorder(setting_terrain, -n), y = n, fill = trap_work_first)) +
   geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Terreno", y = "Frequência de ativação da armadilha") +
-  scale_fill_discrete(labels = c("Falso", "Verdadeiro")) +
-  theme_estat()
-
-  
+  labs(x = "Terreno", y = "Contagem", fill = "Armadilha ativada pela primeira vez") +
+  theme_estat() +
+  geom_text(aes(label = paste0(round(percent, 1), "%")), position = position_dodge(width = 0.9), vjust = -0.25)
 
 
-
-#portanto, nao há relacao entre o terreno e a ativação da armadilha pela primeira vez
 
 
 
