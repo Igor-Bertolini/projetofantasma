@@ -161,6 +161,15 @@ ggplot(contagem_por_terreno, aes(x = reorder(setting_terrain, -n), y = n, fill =
   geom_text(aes(label = paste0(round(percent, 1), "%")), position = position_dodge(width = 0.9), vjust = -0.25)
 
 
+# Criando uma tabela de contingência
+tabela  <- table(dados_filtrados$setting_terrain, dados_filtrados$trap_work_first)
+
+# Realizando o teste qui-quadrado
+teste <- chisq.test(tabela)
+
+# Imprimindo o resultado do teste
+print(teste)
+
 
 
 
@@ -169,11 +178,8 @@ ggplot(contagem_por_terreno, aes(x = reorder(setting_terrain, -n), y = n, fill =
 
 
 # 4) Relação entre as notas IMDB e engajamento;
-library(ggplot2)
-
 # Carrega a biblioteca
 library(ggplot2)
-
 
 # Calcula a correlação
 correlacao <- cor(dados$imdb, dados$engagement, method = "pearson")
@@ -186,11 +192,22 @@ print(teste_correlacao)
 # Plota o gráfico com eixos invertidos
 ggplot(dados, aes(y = imdb, x = engagement)) +
   geom_point() +
-  geom_smooth(method = lm, se = FALSE, color = "red") +
+  geom_smooth(method = lm, se = FALSE, color = "#A11D21") +
   labs(title = "Relação entre o engajamento e as notas IMDB",
        y = "Notas IMDB",
        x = "Engajamento")
 ggsave("disp_bi.pdf", width = 158, height = 93, units = "mm")
+
+
+# Realiza o teste de normalidade para as notas IMDB
+teste_normalidade_imdb <- shapiro.test(dados$imdb)
+print(paste("O resultado do teste de normalidade para as notas IMDB é:"))
+print(teste_normalidade_imdb)
+
+# Realiza o teste de normalidade para o engajamento
+teste_normalidade_engajamento <- shapiro.test(dados$engagement)
+print(paste("O resultado do teste de normalidade para o engajamento é:"))
+print(teste_normalidade_engajamento)
 
 
 # Carrega a biblioteca
